@@ -1,6 +1,6 @@
 const { NotImplementedError } = require('../extensions/index.js');
 
-// const { Node } = require('../extensions/list-tree.js');
+const { Node } = require('../extensions/list-tree.js');
 
 /**
 * Implement simple binary search tree according to task description
@@ -9,100 +9,99 @@ const { NotImplementedError } = require('../extensions/index.js');
 class BinarySearchTree {
 
   constructor() {
-    this.tree = new Node(null);
+    this.tree = null;
   }
 
   root() {
-    return this.tree.data !== null ? this.tree : null;
+    return this.tree;
   }
 
   add(data) {
-    if (this.tree.data === null) return this.tree.data = data;
-
-    function addNode(side, data) {
-      if (side === null) return new Node(data);
-      if (side.data === data) return side;
-      if (side.data > data) side.left = addNode(side.left, data);
-      if (side.data < data) side.right = addNode(side.right, data);
-
-      return side;
-    }
-
     this.tree = addNode(this.tree, data);
+
+    function addNode(node, value) {
+      if (!node) return new Node(value);
+      if (node.data === value) return node;
+      if (value < node.data) node.left = addNode(node.left, value);
+      else node.right = addNode(node.right, value);
+
+      return node;
+    }
   }
 
   has(data) {
-    return !this.find(data) ? false : true;
+    return hasNode(this.tree, data);
+
+    function hasNode(node, value) {
+      if (!node) return false;
+      if (node.data === value) return true;
+      if (value < node.data) return hasNode(node.left, value);
+      else return hasNode(node.right, value);
+    }
   }
 
   find(data) {
-    return hasNode(this.tree, data);
+    return findNode(this.tree, data);
 
-    function hasNode(side, data) {
-      if (side === null || side.data === null) return null;
-      if (side.data === data) return side;
-      if (side.data > data) return hasNode(side.left, data);
-      if (side.data < data) return hasNode(side.right, data);
-
-      return null;
+    function findNode(node, value) {
+      if (!node) return null;
+      if (node.data === value) return node;
+      if (value < node.data) return findNode(node.left, value);
+      else return findNode(node.right, value);
     }
   }
 
   remove(data) {
-    const removeNode = (side, data) => {
-      if (!side.left & !side.right) return null;
-      if (side.data < data) {
-        side.right = removeNode(side.right, data);
-
-        return side;
-      }
-
-      if (side.data > data) {
-        side.left = removeNode(side.left, data);
-
-        return side;
-      }
-
-      if (!side.left) return side = side.right;
-      if (side.right === null) return side = side.left;
-
-      let minRight = side.right;
-
-      while (minRight.left) {
-        minRight = minRight.left;
-      }
-
-      side.data = minRight.data;
-      side.right = removeNode(side.right, minRight.data);
-
-      return side;
-    }
-
     this.tree = removeNode(this.tree, data);
+
+    function removeNode(node, value) {
+      if (!node) return null;
+      if (node.data > value) {
+        node.left = removeNode(node.left, value);
+        return node;
+      } else if (node.data < value) {
+        node.right = removeNode(node.right, value);
+        
+        return node;
+      } else {
+        if (!node.left && !node.right) return null;
+        if (!node.left) return node.right;
+        if (!node.right) return node.left;
+
+        let minRight = node.right;
+
+        while (minRight.left) {
+          minRight = minRight.left
+        }
+
+        node.data = minRight.data;
+        node.right = removeNode(node.right, minRight.data);
+
+        return node;
+      }
+    }
   }
 
   min() {
-    if (!this.tree) return null;
+    return findMin(this.tree);
 
-    let node = this.tree;
+    function findMin(node) {
+      if (!node) return null;
+      if (!node.left) return node.data;
 
-    while (node.left) {
-      node = node.left;
+      return findMin(node.left);
     }
-
-    return node.data;
   }
 
   max() {
-    if (!this.tree) return null;
+    return findMax(this.tree);
 
-    let node = this.tree;
+    function findMax(node) {
+      if (!node) return null;
+      if (!node.right) return node.data;
 
-    while (node.right) {
-      node = node.right;
+      return findMax(node.right);
     }
-
-    return node.data;
   }
 }
 
